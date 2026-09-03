@@ -94,14 +94,16 @@ module Rouge
 
       out = []
       tokens.each do |tok, val|
-        val.scan %r/\n|[^\n]+/ do |s|
-          if s == "\n"
-            yield out
-            out = []
-          else
-            out << [tok, s]
-          end
+        segments = val.split("\n", -1)
+        final_segment = segments.pop
+
+        segments.each do |segment|
+          out << [tok, segment] unless segment.empty?
+          yield out
+          out = []
         end
+
+        out << [tok, final_segment] if final_segment && !final_segment.empty?
       end
 
       # for inputs not ending in a newline
